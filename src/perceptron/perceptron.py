@@ -1,34 +1,46 @@
-
-
-
 class Perceptron(object):
 
-    def __init__(self, data):
+    def __init__(self, data, settings):
         
         self.data = data
+        self.settings = settings
 
     def get_activation(self, item):
 
-        return sum([self.data.get_weight(word) for word, weight in item])
+        return sum([self.data.get_weight(word) for word in item])
+
+    def _test(self, test_data, correct_label):
+
+        score = 0.0
+        length = len(test_data)
+
+        for item in test_data:
+            a = self.get_activation(item[0])
+
+            if (1 if a >= 0 else -1) == correct_label:
+                score += 1
+
+        return round(score * 100 / length, 3)
 
     def test(self):
 
-        score = 0.0
-        length = len(self.data.test_pos_list)
+        pos_pct = self._test(test_data=self.data.test_pos_list, correct_label=1)
+        neg_pct = self._test(test_data=self.data.test_neg_list, correct_label=-1)
+        overall = (pos_pct + neg_pct) / 2.0
 
-        for item in self.data.test_pos_list:
-            a = self.get_activation(item[0])
-
-            if (1 if a >= 0 else -1) == 1:
-                score += 1
-
-        print round(score * 100 / length, 3)
+        print 'Results:'
+        print 'Accuracy (positive dataset): %.3f %%' % pos_pct
+        print 'Accuracy (negative dataset): %.3f %%' % neg_pct
+        print '-' * 40
+        print 'Accuracy (overall): %.3f %%' % overall
 
     def train(self):
 
-        # print self.data.train_list[3][1]
-        # for it in xrange(0, 3):
+        for i in xrange(0, self.settings.params['iterations']):
+            self._train()
+            self.data.shuffle()
 
+    def _train(self):
 
         for item in self.data.train_list:
             a = self.get_activation(item[0])
